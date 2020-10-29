@@ -1,0 +1,25 @@
+name: run examples
+
+on: [push]
+
+jobs:
+  run-examples:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install adaptmesh jupyter
+    - name: Run example_meshes.ipynb
+      run: |
+        sh run_extract.sh examples/example_meshes.ipynb
+    - name: Collect images
+    - uses: actions/upload-artifact@v2
+      with:
+        name: example_meshes
+        path: image_*
