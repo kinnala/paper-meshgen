@@ -17,7 +17,7 @@ jobs:
         pip install adaptmesh jupyter
     - name: Run example_meshes.ipynb
       run: |
-        sh run_extract.sh examples/example_meshes.ipynb
+        sh run_extract.sh examples/example_meshes
     - uses: actions/upload-artifact@v2
       with:
         name: example_meshes
