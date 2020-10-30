@@ -1,5 +1,3 @@
-% Created 2020-08-25 ti 17:45
-% Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -114,12 +112,6 @@ and using the signed distance as an external load.  In contrast to our approach,
 the geometry description is implicit, i.e.~the boundary is defined as the zero
 set of the signed distance function.
 
-
-%% The simplicity of the resulting approach is baffling;
-%% in fact, many existing adaptive FEM codes
-%% already have the required subroutines implemented.
-
-
 \section{Components of the mesh generator}
 \label{sec:components}
 
@@ -222,9 +214,6 @@ Finally, a triangle $T \in \mathcal{T}_k$ is marked for refinement if
 where $0 < \theta < 1$ is a parameter controlling the amount
 of elements to split during each iteration.
 
-%Our implementation uses
-%the default value of $\theta = 0.8$.
-
 \subsection{Red-green-blue refinement}
 \label{sec:rgb}
 
@@ -233,23 +222,8 @@ split into four.  In order to keep the rest of the triangulation conformal,
 i.e.~to not have any hanging nodes, the neighboring triangles are split into two or
 three by the so-called red-green-blue (RGB)
 refinement; cf.~Carstensen~\cite{carstensen2004adaptive}.
-%An example of the RGB refinement is given in Figure~\ref{fig:rgbref}.
 Application of the RGB refinement to the example of Figure~\ref{fig:cdt}
 is depicted in Figure~\ref{fig:firstrgb}.
-
-%% \begin{figure}[htbp]
-%% \centering
-%% \includegraphics[width=0.32\textwidth]{./rgb_ref_1.png}
-%% \includegraphics[width=0.32\textwidth]{./rgb_ref_2.png}
-%% \includegraphics[width=0.32\textwidth]{./rgb_ref_3.png}
-%% \caption{The lower triangle of the leftmost mesh is split using the \emph{red
-%%   refinement} (split into four) and the upper triangle is split
-%%   using the \emph{green refinement} (split into two).  Next, the
-%%   rightmost triangle of the middle mesh is split using the red refinement, the
-%%   triangle below is split using the green refinement, and the triangle above is
-%%   split using the \emph{blue refinement} (split into three).}
-%% \label{fig:rgbref}
-%% \end{figure}
 
 \begin{figure}[htbp]
 \centering
@@ -266,12 +240,11 @@ after a solve of \eqref{eq:discweakform} and an adaptive RGB refinement.}
 We use a mesh smoothing approach introduced by Chen--Holst~\cite{Chen_2011} who
 refer to the algorithm as \emph{centroidal patch triangulation} (CPT) smoothing.
 The idea is to repeatedly move the interior vertices to the area-weighted
-averages of the barycenters of the surrounding triangles.
-The CPT smoothing is combined with an edge flipping
-algorithm, also described in Chen--Holst~\cite{Chen_2011},
-to improve the quality of the resulting triangulation.
-
-%In our implementation the smoothing is repeated 50 times.
+averages of the barycenters of the surrounding triangles.  The CPT smoothing is
+combined with an edge flipping algorithm, also described in
+Chen--Holst~\cite{Chen_2011}, to improve the quality of the resulting
+triangulation.  The mesh smoother is applied to the spiral-shaped domain example 
+in Figure~\ref{fig:firstsmooth}.
 
 \begin{algorithm}[H]
   \caption{Mesh smoother}
@@ -290,6 +263,15 @@ to improve the quality of the resulting triangulation.
   \end{algorithmic}
 \end{algorithm}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.32\textwidth]{../image_6.png}
+\includegraphics[width=0.32\textwidth]{../image_7.png}
+\caption{(Left.) Once adaptively refined triangulation. (Right.) The resulting
+  triangulation after smoothing.}
+\label{fig:firstsmooth}
+\end{figure}
+
 \section{The mesh generation algorithm}
 \label{sec:orgff9b6c1}
 
@@ -300,6 +282,31 @@ in order to guarantee the termination of the algorithm.  Nevertheless, in practi
 the refinement loop should be terminated when a quality criterion is
 satisfied, e.g., when the average minimum angle of the triangles
 is above a predefined threshold.
+The entire mesh generation process for the spiral-shaped domain
+example is given in Figure~\ref{fig:spiralexample}.
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.24\textwidth]{../image_19.png}
+  \includegraphics[width=0.24\textwidth]{../image_5.png}
+  \includegraphics[width=0.24\textwidth]{../image_6.png}
+  \includegraphics[width=0.24\textwidth]{../image_7.png}\\
+  \includegraphics[width=0.24\textwidth]{../image_8.png}
+  \includegraphics[width=0.24\textwidth]{../image_9.png}
+  \includegraphics[width=0.24\textwidth]{../image_10.png}
+  \includegraphics[width=0.24\textwidth]{../image_11.png}\\
+  \includegraphics[width=0.24\textwidth]{../image_12.png}
+  \includegraphics[width=0.24\textwidth]{../image_13.png}
+  \includegraphics[width=0.24\textwidth]{../image_14.png}
+  \includegraphics[width=0.24\textwidth]{../image_15.png}\\
+  \includegraphics[width=0.24\textwidth]{../image_16.png}
+  \includegraphics[width=0.24\textwidth]{../image_17.png}
+  \caption{The entire mesh generation process for the spiral-shaped domain
+    example from left-to-right, top-to-bottom.}
+\label{fig:spiralexample}
+\end{figure}
+
 
 \begin{algorithm}[H]
   \caption{Triangular mesh generator}
@@ -319,30 +326,38 @@ is above a predefined threshold.
   \end{algorithmic}
 \end{algorithm}
 
-%% Given a sequence of input vertices \(\mathcal{C}\), our mesh generation algorithm
-%% reads:
-
-%% \begin{enumerate}
-%% \item Find a CDT of \(\mathcal{C}\) with the constrained edges \((\mathcal{C}_j,
-%%    \mathcal{C}_{j+1})\), \(j=1,\dots,N-1\), and \((\mathcal{C}_N, \mathcal{C}_1)\).
-%% Denote the resulting triangulation by \(\mathcal{T}_0\).
-%% \item Solve Problem ?? with
-%% \end{enumerate}
 
 \section{Implementation and examples}
 
 We implemented the mesh generator in Python for computational experiments.  Our
 implementation is referred to as \verb|adaptmesh| and is archived in Zenodo~??.
 The implementation relies heavily on the scientific Python
-ecosystem~\cite{virtanen2020scipy}.  It includes source code from \verb|tri| \cite{tri}
-(CDT) and the early MIT licensed versions of \verb|optimesh| \cite{optimesh} (CPT
-smoothing) and \verb|meshplex| \cite{meshplex} (edge flipping).  Moreover, it
-dynamically imports modules from \verb|scikit-fem| \cite{gustafsson2020scikit} (RGB
-refinement) and \verb|matplotlib| \cite{hunter2007matplotlib} (visualization).
+ecosystem~\cite{virtanen2020scipy}.  It includes source code from \verb|tri|
+\cite{tri} (CDT) and the early MIT licensed versions of \verb|optimesh|
+\cite{optimesh} (CPT smoothing) and \verb|meshplex| \cite{meshplex} (edge
+flipping).  Moreover, it dynamically imports modules from \verb|scikit-fem|
+\cite{gustafsson2020scikit} (RGB refinement) and \verb|matplotlib|
+\cite{hunter2007matplotlib} (visualization).  Some examples are given in
+Figure~\ref{fig:moreexamples}.  Note that by default \verb|adaptmesh| uses the
+average triangle quality as a stopping criterion which can lead to individual
+low quality triangles.  Using the minimum triangle quality will lead to more
+refined meshes.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.32\textwidth]{../image_1.png}
+  \includegraphics[width=0.32\textwidth]{../image_2.png}
+  \includegraphics[width=0.32\textwidth]{../image_4.png}\\
+  \includegraphics[width=0.22\textwidth]{../image_21.png}
+  \includegraphics[width=0.32\textwidth]{../image_22.png}
+  \includegraphics[width=0.32\textwidth]{../image_23.png}
+  \caption{Some example meshes generated using \texttt{adaptmesh}.}
+\label{fig:moreexamples}
+\end{figure}
 
 \section{An example application}
 
-As an example application, we simulate an experiment of a
+As an example application, we simulate the experiment of a
 microfluidic device from
 Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes}
 which is analogous to electron transport in two-dimensional
@@ -381,10 +396,10 @@ the left boundary.
   (Top-right.) The mesh resulting from our mesh generator. (Bottom-left.)  The
   experimental streamlines obtained from micro-particle image velocimetry.
   (Bottom-right.) The computational streamlines calculated using
-  FiPy~\cite{FiPy2009}.  Top-left and bottom-left images are cropped from the
+  FiPy~\cite{FiPy2009}.  The images on the left panel are cropped from the
   figures in Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} with the red
-  rectangles added later by the author of this paper.  The images on the left
-  panel (the original and the modified ones) are licensed under Creative Commons
+  rectangles added later by the author of this paper.  These images (the
+  original and the modified ones) are licensed under Creative Commons
   Attribution 4.0 International License
   (see~\url{https://creativecommons.org/licenses/by/4.0/}).}
 \label{fig:esimerkki}
