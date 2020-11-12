@@ -1,5 +1,6 @@
-\documentclass[11pt]{article}
-\usepackage[utf8]{inputenc}
+%\documentclass[12pt]{rmstyle}
+\documentclass[12pt]{article}
+%\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{grffile}
@@ -17,7 +18,7 @@
 \usepackage{xcolor}
 \usepackage{algorithmicx}
 \usepackage[noend]{algpseudocode}
-\author{Tom Gustafsson}
+\author{Tom Gustafsson\footnote{Corresponding author. \texttt{firstname.lastname@aalto.fi}}}
 \date{\today}
  \hypersetup{
      colorlinks=true,
@@ -26,7 +27,18 @@
      citecolor=purple,
      urlcolor=purple,
      }
-\title{A technique for unstructured mesh generation via adaptive finite elements}
+ \title{A simple technique for unstructured mesh generation via adaptive finite elements}
+
+
+ \makeatletter%
+\@ifclassloaded{<rmstyle>}%
+  {\volume{XX}
+\issue{Y}
+\year{20ZZ}
+\doilabel{12345}}%
+  {}%
+\makeatother%
+ 
 \begin{document}
 
 \newcommand*\DNA{\textsc{dna}}
@@ -40,13 +52,12 @@
 \begin{abstract}
   This article describes a concise algorithm for the generation of triangular
   meshes with the help of standard adaptive finite element methods.  We
-  demonstrate that an adaptive finite element solver can produce quality meshes
-  even for low quality initial meshes if a robust mesh smoothing algorithm is
-  applied between the mesh refinement steps.  Thus, we propose that the adaptive
-  process with smoothing can act as a general purpose triangular mesh generator.
-  Finally, the mesh generator is applied to simulate an experimental creeping
-  flow measurement analogous to electron current in graphene using the finite
-  volume method.
+  demonstrate that a generic adaptive finite element solver can be repurposed
+  into a triangular mesh generator if a robust mesh smoothing algorithm is
+  applied between the mesh refinement steps.  We present an implementation of
+  the mesh generator and apply it in the creation of a mesh for the finite
+  volume simulation of an experimental creeping flow measurement analogous to
+  electron transport in graphene.
 \end{abstract}
 
 \section{Introduction}
@@ -72,19 +83,19 @@ PDE's.  The process can be summarized as follows:
 \item Split
       the triangles with the largest error indicator
       using adaptive mesh refinement techniques.
-\item Apply mesh smoothing to the resulting triangulation.
+\item Apply centroidal patch tesselation (CPT) smoothing to the resulting
+  triangulation.
 \item Go to step 2.
 \end{enumerate}
 It is noteworthy that the steps 2, 3 and 5 correspond exactly to what is done in
 any standard implementation of the adaptive FEM;
-cf.~Verfürth~\cite{Verf_rth_2013} who calls it the \emph{adaptive process}.
+cf.~Verf\"{u}rth~\cite{Verf_rth_2013} who calls it the \emph{adaptive process}.
 
 The goal of this work is to demonstrate that if the mesh smoothing algorithm of
 step 4 is chosen properly, the adaptive process tends to produce reasonable
 meshes even if the initial mesh is of low quality.  Thus, we demonstrate that
 the adaptive process---together with an implementation of the CDT and a robust
-mesh smoothing algorithm---can act as a simple general purpose triangular mesh
-generator.
+mesh smoothing algorithm---can act as a simple triangular mesh generator.
 
 \section{Prior work}
 \label{sec:org7798f6d}
@@ -106,11 +117,11 @@ above a predefined threshold.
 Persson--Strang~\cite{persson2004simple} describe another technique based on
 iterative relocation of the nodes.  An initial mesh is given by a structured
 background mesh which is then relaxed by intepreting the edges as a
-precompressed truss structure.  The structure is forced inside a given
+precompressed truss structure.  The structure is then forced inside a given
 computational domain by expressing the boundary using signed distance functions
-and using the signed distance as an external load.  In contrast to our approach,
-the geometry description is implicit, i.e.~the boundary is defined as the zero
-set of the signed distance function.
+and interpreting the signed distance as an external load acting on the truss.
+In contrast to our approach, the geometry description is implicit, i.e.~the
+boundary is defined as the zero set of a user-defined function.
 
 \section{Components of the mesh generator}
 \label{sec:components}
@@ -130,30 +141,33 @@ by \(\Omega_{\mathcal{C}} \subset \mathbb{R}^2\).
 \subsection{Constrained Delaunay triangulation}
 \label{sec:cdt}
 
-A \emph{triangulation} of \(\Omega_{\mathcal{C}}\) is a collection of
-nonoverlapping nondegenerate triangles whose union is exactly
+A \emph{triangulation} of \(\Omega_{\mathcal{C}}\) is a
+collection of nonoverlapping nondegenerate triangles whose union is exactly
 \(\Omega_{\mathcal{C}}\).  Our initial triangulation \(\mathcal{T}_0\) is a
 \emph{constrained Delaunay triangulation} (CDT) of the input vertices
 \(\mathcal{C}\) with the edges \((\mathcal{C}_1, \mathcal{C}_2)\),
 \((\mathcal{C}_2,\mathcal{C}_3)\), \(\dots\), \((\mathcal{C}_{N-1},
 \mathcal{C}_N)\), \((\mathcal{C}_N, \mathcal{C}_1)\) constrained to be a part of
-the resulting triangulation; cf.~Chew~\cite{Chew_1987} for the definition of a
-CDT and a simple algorithm for its construction.
+the resulting triangulation and the triangles outside the polygon removed;
+cf.~Chew~\cite{Chew_1987} for the exact definition of a CDT and an algorithm for
+its construction.
 
-An example CDT of a polygon with a spiral-shaped boundary is given in
-Figure~\ref{fig:cdt}. It is obvious that the CDT is not always a high quality
-computational mesh due to the presence of arbitrarily small angles.  Thus, we
-seek to improve the CDT by iteratively adding new triangles, and smoothing the
-mesh.  Note that the remaining steps do not assume the use of CDT as the initial
-triangulation---any conforming triangulation will suffice.
+An example initial triangulation of a polygon with a spiral-shaped boundary is
+given in Figure~\ref{fig:cdt}. It is obvious that the CDT is not always a high
+quality computational mesh due to the presence of arbitrarily small angles.
+Thus, we seek to improve the initial triangulation by iteratively adding new
+triangles, and smoothing the mesh.  Note that the remaining steps do not assume
+the use of CDT as an initial triangulation---any triangulation with the
+prescribed edges will suffice.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.33\textwidth]{../image_19.png}
-  \includegraphics[width=0.33\textwidth]{../image_5.png}
-\caption{A spiral-shaped boundary approximated by linear segments and the corresponding
-  CDT.  An example from the documentation of the
-Triangle mesh generator~\cite{shewchuk1996triangle}.}
+  \includegraphics[width=0.24\textwidth]{../image_19.png}
+  \includegraphics[width=0.24\textwidth]{../image_5.png}
+\caption{A spiral-shaped boundary approximated by linear segments and the
+  corresponding CDT with the triangles outside of the polygon removed.  An
+  example from the documentation of the Triangle mesh
+  generator~\cite{shewchuk1996triangle}.}
 \label{fig:cdt}
 \end{figure}
 
@@ -162,11 +176,11 @@ Triangle mesh generator~\cite{shewchuk1996triangle}.}
 
 In order to decide on the placement of the new vertices and triangles, we solve
 the Laplace equation\footnote{The choice of the Laplace equation is motivated by
-the following heuristic observation: a \emph{quality mesh} is often synonymous with a \emph{good mesh for the
-finite element solution of the Laplace equation}.} using the FEM and evalute the
-corresponding a~posteriori error estimator.  The triangles matching
-to the highest values of the error estimator are refined, i.e.~split
-into smaller triangles.
+the following heuristic observation: a \emph{quality mesh} is often synonymous
+with a \emph{good mesh for the finite element solution of the Laplace
+equation}.} using the FEM and evalute the corresponding a~posteriori error
+estimator.  The triangles that have the highest values of the error estimator
+are refined, i.e.~split into smaller triangles.
 
 The Laplace equation reads: find $u : \Omega_{\mathcal{C}} \rightarrow \mathbb{R}$ satisfying
 \begin{alignat}{2}
@@ -186,7 +200,7 @@ $
 $
 
 We denote the \(k\)th triangulation of the
-domain \(\Omega_{\mathcal{C}}\) by \(\mathcal{T}_k\), \(k=0,1,\dots\), and
+domain \(\Omega_{\mathcal{C}}\) by \(\mathcal{T}_k\), \(k=0,1,\dots\), and
 use the piecewise linear polynomial space
 $$V_h^k = \{ v \in V : v|_T \in P_1(T)~\forall T \in \mathcal{T}_k \},$$
 where $P_1(T)$ denotes the set of linear polynomials over $T$.
@@ -199,9 +213,9 @@ find \(u_h^k \in V_h^k\) such that
 The local a posteriori error estimator
 reads
 \begin{equation}
-        \eta_T(u_h^k) = \sqrt{h_T^2 |T|^2 + \frac12 h_T \int_{\partial T \setminus \partial \Omega_{\mathcal{C}}} (\llbracket \nabla u_h^k \cdot \boldsymbol{n} \rrbracket)^2 \,\mathrm{d}s}, \quad T \in \mathcal{T}_k,
+        \eta_T(u_h^k) = \sqrt{h_T^2 A_T^2 + \frac12 h_T \int_{\partial T \setminus \partial \Omega_{\mathcal{C}}} (\llbracket \nabla u_h^k \cdot \boldsymbol{n} \rrbracket)^2 \,\mathrm{d}s}, \quad T \in \mathcal{T}_k,
 \end{equation}
-where $|T|$ is the area of the triangle $T$ and $h_T$ is the length of its longest edge, $\llbracket w \rrbracket |_{\partial T \setminus \partial \Omega_{\mathcal{C}}}$ denotes the jump in the values of
+where $A_T$ is the area of the triangle $T$ and $h_T$ is the length of its longest edge, $\llbracket w \rrbracket |_{\partial T \setminus \partial \Omega_{\mathcal{C}}}$ denotes the jump in the values of
 $w$ over $\partial T \setminus \partial \Omega_{\mathcal{C}}$, and $\boldsymbol{n}$ is a unit normal vector to
 $\partial T$.
 The error estimator $\eta_T$ is evaluated for each triangle
@@ -211,7 +225,7 @@ Finally, a triangle $T \in \mathcal{T}_k$ is marked for refinement if
   \label{eq:adaptivetheta}
    \eta_T > \theta \max_{T^\prime \in \mathcal{T}_k} \eta_{T^\prime},
 \end{equation}
-where $0 < \theta < 1$ is a parameter controlling the amount
+where $0 < \theta < 1$ is a parameter controlling the amount
 of elements to split during each iteration.
 
 \subsection{Red-green-blue refinement}
@@ -222,15 +236,15 @@ split into four.  In order to keep the rest of the triangulation conformal,
 i.e.~to not have any hanging nodes, the neighboring triangles are split into two or
 three by the so-called red-green-blue (RGB)
 refinement; cf.~Carstensen~\cite{carstensen2004adaptive}.
-Application of the RGB refinement to the example of Figure~\ref{fig:cdt}
+Using RGB refinement to the example of Figure~\ref{fig:cdt}
 is depicted in Figure~\ref{fig:firstrgb}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.32\textwidth]{../image_5.png}
-\includegraphics[width=0.32\textwidth]{../image_6.png}
-\caption{(Left.) The initial triangulation. (Right.) The resulting mesh
-after a solve of \eqref{eq:discweakform} and an adaptive RGB refinement.}
+\includegraphics[width=0.24\textwidth]{../image_5.png}
+\includegraphics[width=0.24\textwidth]{../image_6.png}
+\caption{(Left.) The initial triangulation. (Right.) The resulting triangulation
+  after a solve of \eqref{eq:discweakform} and an adaptive RGB refinement.}
 \label{fig:firstrgb}
 \end{figure}
 
@@ -246,29 +260,29 @@ Chen--Holst~\cite{Chen_2011}, to improve the quality of the resulting
 triangulation.  The mesh smoother is applied to the spiral-shaped domain example 
 in Figure~\ref{fig:firstsmooth}.
 
-\begin{algorithm}[H]
-  \caption{Mesh smoother}
-  \begin{algorithmic}[1]
-    \Require{$\mathcal{T}$ is a triangular mesh}
-    \Require{$S$ is the total number of smoothing iterations}
-    \Statex
-    \Function{CPT}{$\mathcal{T}$}
-    \Let{$\mathcal{T}_0$}{$\textsc{CDT}(\mathcal{C}$)}
-    \For{$k \gets 1 \textrm{ to } M$}
-    \Let{$\mathcal{T}_k^\prime$}{$\textsc{RGB}(\mathcal{T}_{k-1},\{\eta_T : T \in \mathcal{T}_{k-1}\})$}
-    \Let{$\mathcal{T}_k$}{$\textsc{CPT}(\mathcal{T}_k^\prime)$}
-    \EndFor
-    \State \Return{$\mathcal{T}_N$}
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
+%% \begin{algorithm}[H]
+%%   \caption{Mesh smoother}
+%%   \begin{algorithmic}[1]
+%%     \Require{$\mathcal{T}$ is a triangular mesh}
+%%     \Require{$S$ is the total number of smoothing iterations}
+%%     \Statex
+%%     \Function{CPT}{$\mathcal{T}$}
+%%     \Let{$\mathcal{T}_0$}{$\textsc{CDT}(\mathcal{C}$)}
+%%     \For{$k \gets 1 \textrm{ to } M$}
+%%     \Let{$\mathcal{T}_k^\prime$}{$\textsc{RGB}(\mathcal{T}_{k-1},\{\eta_T : T \in \mathcal{T}_{k-1}\})$}
+%%     \Let{$\mathcal{T}_k$}{$\textsc{CPT}(\mathcal{T}_k^\prime)$}
+%%     \EndFor
+%%     \State \Return{$\mathcal{T}_N$}
+%%     \EndFunction
+%%   \end{algorithmic}
+%% \end{algorithm}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.32\textwidth]{../image_6.png}
-\includegraphics[width=0.32\textwidth]{../image_7.png}
+\includegraphics[width=0.24\textwidth]{../image_6.png}
+\includegraphics[width=0.24\textwidth]{../image_7.png}
 \caption{(Left.) Once adaptively refined triangulation. (Right.) The resulting
-  triangulation after smoothing.}
+  triangulation after smoothing and edge flipping.}
 \label{fig:firstsmooth}
 \end{figure}
 
@@ -278,12 +292,11 @@ in Figure~\ref{fig:firstsmooth}.
 In previous sections we gave an overview of all the components of the mesh
 generation algorithm.  The resulting mesh generator is now summarized in
 Algorithm~\ref{alg:meshgen}.  The total number of refinements $M$ is a constant
-in order to guarantee the termination of the algorithm.  Nevertheless, in practice
-the refinement loop should be terminated when a quality criterion is
-satisfied, e.g., when the average minimum angle of the triangles
-is above a predefined threshold.
-The entire mesh generation process for the spiral-shaped domain
-example is given in Figure~\ref{fig:spiralexample}.
+in order to guarantee the termination of the algorithm.  Nevertheless, in
+practice and in our implementation the refinement loop is terminated when a
+quality criterion is satisfied, e.g., when the average minimum angle of the
+triangles is above a predefined threshold.  The entire mesh generation process
+for the spiral-shaped domain example is given in Figure~\ref{fig:spiralexample}.
 
 
 \begin{figure}[htbp]
@@ -309,10 +322,10 @@ example is given in Figure~\ref{fig:spiralexample}.
 
 
 \begin{algorithm}[H]
-  \caption{Triangular mesh generator}
+  \caption{Pseudocode for the triangular mesh generator}
   \label{alg:meshgen}
   \begin{algorithmic}[1]
-    \Require{$\mathcal{C}$ is a sequence of domain corner points}
+    \Require{$\mathcal{C}$ is a sequence of polygonal domain corner points}
     \Require{$M$ is the total number of refinements}
     \Statex
     \Function{Generate}{$\mathcal{C}$}
@@ -329,19 +342,24 @@ example is given in Figure~\ref{fig:spiralexample}.
 
 \section{Implementation and examples}
 
-We implemented the mesh generator in Python for computational experiments.  Our
-implementation is referred to as \verb|adaptmesh| and is archived in Zenodo~??.
-The implementation relies heavily on the scientific Python
-ecosystem~\cite{virtanen2020scipy}.  It includes source code from \verb|tri|
-\cite{tri} (CDT) and the early MIT licensed versions of \verb|optimesh|
-\cite{optimesh} (CPT smoothing) and \verb|meshplex| \cite{meshplex} (edge
-flipping).  Moreover, it dynamically imports modules from \verb|scikit-fem|
-\cite{gustafsson2020scikit} (RGB refinement) and \verb|matplotlib|
-\cite{hunter2007matplotlib} (visualization).  Some examples are given in
-Figure~\ref{fig:moreexamples}.  Note that by default \verb|adaptmesh| uses the
-average triangle quality as a stopping criterion which can lead to individual
-low quality triangles.  Using the minimum triangle quality will lead to more
-refined meshes.
+We created a prototype implementation of the mesh generator in Python for
+computational experiments~\cite{adaptmesh2020}.  The implementation relies
+heavily on the scientific Python ecosystem~\cite{virtanen2020scipy}.  It
+includes source code from pre-existing Python packages \verb|tri| \cite{tri}
+(CDT implementation, ported from Python 2) and the older MIT-licensed versions of
+\verb|optimesh| \cite{optimesh} (CPT smoothing) and \verb|meshplex|
+\cite{meshplex} (edge flipping).  Moreover, it dynamically imports modules from
+\verb|scikit-fem| \cite{gustafsson2020scikit} (RGB refinement) and
+\verb|matplotlib| \cite{hunter2007matplotlib} (visualization).
+
+Some example meshes are given in Figure~\ref{fig:moreexamples}.  Note that by
+default our implementation uses the average triangle quality\footnote{Triangle
+quality is defined as two times the ratio of the incircle and circumcircle
+radii.} 0.9 as a stopping criterion which can lead to individual slit triangles.
+This is visible especially in the last two examples with randomized boundaries.
+This could be circumvented by using a different stopping criterion, e.g., the
+minimum triangle angle.  This is not enabled by default because it may increase the
+number of triangles significantly.
 
 \begin{figure}[htbp]
   \centering
@@ -351,17 +369,16 @@ refined meshes.
   \includegraphics[width=0.22\textwidth]{../image_21.png}
   \includegraphics[width=0.32\textwidth]{../image_22.png}
   \includegraphics[width=0.32\textwidth]{../image_23.png}
-  \caption{Some example meshes generated using \texttt{adaptmesh}.}
+  \caption{Some example meshes generated using \texttt{adaptmesh}---our
+    implementation of the proposed algorithm.}
 \label{fig:moreexamples}
 \end{figure}
 
 \section{An example application}
 
-As an example application, we simulate the experiment of a
-microfluidic device from
-Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes}
-which is analogous to electron transport in two-dimensional
-conductive materials such as graphene.
+We simulate an experiment performed on a microfluidic device in
+Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} which is analogous to
+electron transport in two-dimensional conductive materials such as graphene.
 The governing equation is the Stokes system
 \begin{equation}
   \left\{
@@ -380,33 +397,47 @@ The boundary $\partial \Omega$ of the computational domain $\Omega \subset
 \mathbb{R}^2$ is extracted from a photograph of the experiment and given as an
 input to the mesh generator; the photograph is given in the top-left panel and
 the resulting computational mesh in the top-right panel of
-Figure~\ref{fig:esimerkki}.  In order to simplify the problem we choose the
-computational domain so that the left boundary corresponds approximately to the
-vertical streamlines in the micro-particle image velocimetry (bottom-left
-panel), i.e.~the computational domain is enclosed in the red rectangle.  This
-allows using the Dirichlet boundary condition $u_x = 0$, $u_y = -U$, $U > 0$, on
-the left boundary.
+Figure~\ref{fig:esimerkki}.  In order to simplify the problem setup we choose
+the computational domain so that the left boundary corresponds to the vertical
+streamlines in the micro-particle image velocimetry (bottom-left picture),
+i.e.~the computational domain is enclosed in the red rectangle.  This allows
+using the Dirichlet boundary condition $u_x = 0$, $u_y = -U$, $U > 0$, on the
+left boundary.  Our aim is to reproduce the location of the swirl and,
+therefore, the exact values $U=\mu=1$ are irrelevant because they only scale the
+maximum values of the velocity and the pressure fields in Dirichlet-only
+problems, i.e.~the shape of the solution will not change.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{./esimerkki_vertailu.png}
-\caption{(Top-left.) A photograph of the experiment with the particles trapped
+\caption{(Top-left) A photograph of the experiment with the particles trapped
   inside a microfluidic device;
   cf.~Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} for more details.
-  (Top-right.) The mesh resulting from our mesh generator. (Bottom-left.)  The
+  (Top-right) The mesh resulting from our mesh generator. (Bottom-left) The
   experimental streamlines obtained from micro-particle image velocimetry.
-  (Bottom-right.) The computational streamlines calculated using
-  FiPy~\cite{FiPy2009}.  The images on the left panel are cropped from the
-  figures in Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} with the red
-  rectangles added later by the author of this paper.  These images (the
-  original and the modified ones) are licensed under Creative Commons
-  Attribution 4.0 International License
+  (Bottom-right) The numerical velocity field calculated using
+  \texttt{FiPy}~\cite{FiPy2009} and the corresponding streamlines from
+  \texttt{matplotlib}~\cite{hunter2007matplotlib}.  The images on the left panel
+  are cropped from the figures in
+  Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} with the red rectangles
+  added later by the author of the present paper.  The original images are
+  licensed under Creative Commons Attribution 4.0 International License
   (see~\url{https://creativecommons.org/licenses/by/4.0/}).}
 \label{fig:esimerkki}
 \end{figure}
 
 \section{Conclusions and future work}
 \label{sec:org615e973}
+
+We introduced an algorithm for the generation of triangular meshes for explicit
+polygonal domains based on the standard adaptive finite element method and
+centroidal patch triangulation smoothing.  We presented an implementation of the
+algorithm which was used to demonstrate that the resulting triangular meshes are
+reasonable and have an average triangle quality equal to or above 0.9.
+The majority of the required components are likely to exist in an
+implementation of the adaptive finite element method.  Therefore, the algorithm
+may be a suitable candidate if an existing adaptive finite element solver is to be
+extended with basic mesh generation capabilities.
 
 \bibliographystyle{unsrt}
 \bibliography{mesh}
