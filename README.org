@@ -1,3 +1,13 @@
 * A simple technique for unstructured mesh generation via adaptive finite elements
 
-Source code for the manuscript and the examples by T. Gustafsson.
+This repository contains the LaTeX source for the manuscript "A simple technique
+for unstructured mesh generation via adaptive finite elements" by T. Gustafsson,
+and the Python source code for the computational examples included in the
+manuscript.
+
+- paper/ contains the LaTeX source.
+- examples/example_fipy.py is based on the Stokes cavity example
+  (https://www.ctcms.nist.gov/fipy/examples/flow/generated/examples.flow.stokesCavity.html)
+  of FiPy. The example is licensed under the FiPy license; see the docstring of
+  the file for more details.
+- examples/example_meshes.ipynb generates the rest of the example meshes.
