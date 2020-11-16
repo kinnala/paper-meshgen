@@ -1,4 +1,5 @@
-\documentclass[12pt]{rmstyle}
+%\documentclass[12pt]{rmstyle}
+\documentclass[11pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{grffile}
@@ -29,12 +30,12 @@
 }
 \title{A simple technique for unstructured mesh generation via adaptive finite elements}
 
-\makeatletter
- \volume{XX}
- \issue{Y}
- \year{20ZZ}
- \doilabel{12345}
-\makeatother
+%% \makeatletter
+%%  \volume{XX}
+%%  \issue{Y}
+%%  \year{20ZZ}
+%%  \doilabel{12345}
+%% \makeatother
  
 \begin{document}
 
@@ -162,8 +163,8 @@ prescribed edges will suffice.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.24\textwidth]{../image_19.png}
-  \includegraphics[width=0.24\textwidth]{../image_5.png}
+  \includegraphics[width=0.24\textwidth]{./image_19.png}
+  \includegraphics[width=0.24\textwidth]{./image_5.png}
 \caption{A spiral-shaped boundary approximated by linear segments and the
   corresponding CDT with the triangles outside of the polygon removed.  An
   example from the documentation of the Triangle mesh
@@ -240,8 +241,8 @@ example of Figure~\ref{fig:cdt} is depicted in Figure~\ref{fig:firstrgb}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.24\textwidth]{../image_5.png}
-\includegraphics[width=0.24\textwidth]{../image_6.png}
+\includegraphics[width=0.24\textwidth]{./image_5.png}
+\includegraphics[width=0.24\textwidth]{./image_6.png}
 \caption{(Left.) The initial triangulation. (Right.) The resulting triangulation
   after a solve of \eqref{eq:discweakform} and an adaptive RGB refinement.}
 \label{fig:firstrgb}
@@ -261,8 +262,8 @@ in Figure~\ref{fig:firstsmooth}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.24\textwidth]{../image_6.png}
-\includegraphics[width=0.24\textwidth]{../image_7.png}
+\includegraphics[width=0.24\textwidth]{./image_6.png}
+\includegraphics[width=0.24\textwidth]{./image_7.png}
 \caption{(Left.) The adaptively refined triangulation. (Right.) The resulting
   triangulation after smoothing and edge flipping.}
 \label{fig:firstsmooth}
@@ -282,20 +283,20 @@ for the spiral-shaped domain example is given in Figure~\ref{fig:spiralexample}.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.24\textwidth]{../image_19.png}
-  \includegraphics[width=0.24\textwidth]{../image_5.png}
-  \includegraphics[width=0.24\textwidth]{../image_6.png}
-  \includegraphics[width=0.24\textwidth]{../image_7.png}\\
-  \includegraphics[width=0.24\textwidth]{../image_8.png}
-  \includegraphics[width=0.24\textwidth]{../image_9.png}
-  \includegraphics[width=0.24\textwidth]{../image_10.png}
-  \includegraphics[width=0.24\textwidth]{../image_11.png}\\
-  \includegraphics[width=0.24\textwidth]{../image_12.png}
-  \includegraphics[width=0.24\textwidth]{../image_13.png}
-  \includegraphics[width=0.24\textwidth]{../image_14.png}
-  \includegraphics[width=0.24\textwidth]{../image_15.png}\\
-  \includegraphics[width=0.24\textwidth]{../image_16.png}
-  \includegraphics[width=0.24\textwidth]{../image_17.png}
+  \includegraphics[width=0.24\textwidth]{./image_19.png}
+  \includegraphics[width=0.24\textwidth]{./image_5.png}
+  \includegraphics[width=0.24\textwidth]{./image_6.png}
+  \includegraphics[width=0.24\textwidth]{./image_7.png}\\
+  \includegraphics[width=0.24\textwidth]{./image_8.png}
+  \includegraphics[width=0.24\textwidth]{./image_9.png}
+  \includegraphics[width=0.24\textwidth]{./image_10.png}
+  \includegraphics[width=0.24\textwidth]{./image_11.png}\\
+  \includegraphics[width=0.24\textwidth]{./image_12.png}
+  \includegraphics[width=0.24\textwidth]{./image_13.png}
+  \includegraphics[width=0.24\textwidth]{./image_14.png}
+  \includegraphics[width=0.24\textwidth]{./image_15.png}\\
+  \includegraphics[width=0.24\textwidth]{./image_16.png}
+  \includegraphics[width=0.24\textwidth]{./image_17.png}
   \hspace{0.48\textwidth}
   \caption{The entire mesh generation process for the spiral-shaped domain
     example from left-to-right, top-to-bottom.}
@@ -343,11 +344,11 @@ interior angles on the boundary.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.32\textwidth]{../image_1.png}
-  \includegraphics[width=0.32\textwidth]{../image_2.png}
-  \includegraphics[width=0.32\textwidth]{../image_4.png}\\
-  \includegraphics[width=0.22\textwidth]{../image_21.png}
-  \includegraphics[width=0.32\textwidth]{../image_23.png}
+  \includegraphics[width=0.32\textwidth]{./image_1.png}
+  \includegraphics[width=0.32\textwidth]{./image_2.png}
+  \includegraphics[width=0.32\textwidth]{./image_4.png}\\
+  \includegraphics[width=0.22\textwidth]{./image_21.png}
+  \includegraphics[width=0.32\textwidth]{./image_23.png}
   \caption{Some example meshes generated using our
     implementation of the proposed algorithm.
   The source code is available in \cite{tomgustafsson_2020}.}
