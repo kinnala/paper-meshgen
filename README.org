@@ -15,3 +15,6 @@ manuscript.
   (https://www.ctcms.nist.gov/fipy/examples/flow/generated/examples.flow.stokesCavity.html)
   of FiPy. The example is licensed under the FiPy license; see the docstring of
   the file for more details.
+
+The source code of the mesh generator is available at
+https://github.com/kinnala/adaptmesh.
