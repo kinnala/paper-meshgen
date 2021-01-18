@@ -53,7 +53,7 @@
   demonstrate that a generic adaptive finite element solver can be repurposed
   into a triangular mesh generator if a robust mesh smoothing algorithm is
   applied between the mesh refinement steps.  We present an implementation of
-  the mesh generator and demonstrate the resulting meshes via several examples.
+  the mesh generator and demonstrate the resulting meshes via examples.
 \end{abstract}
 
 \section{Introduction}
@@ -73,7 +73,7 @@ two-dimensional polygonal domains.  The process can be summarised as follows:
 \item Find a constrained Delaunay triangulation (CDT) of the polygonal domain
       using the corner points as input vertices and the edges
       as constraints.
-\item Solve the Laplace equation with the given triangulation
+\item Solve the Poisson equation with the given triangulation
       and the FEM.
 \item Split
       the triangles with the largest error indicator
@@ -135,7 +135,8 @@ $$(\mathcal{C}_1, \mathcal{C}_2), (\mathcal{C}_2,\mathcal{C}_3),
 \dots, (\mathcal{C}_{N-1}, \mathcal{C}_N), (\mathcal{C}_N,\mathcal{C}_1).$$
 We do not allow self-intersecting polygons although
 the algorithm can be generalised to polygons
-with holes.
+with holes which we have done in our implementation
+of the algorithm~\cite{adaptmesh2020}.
 The corresponding polygonal domain is denoted
 by \(\Omega_{\mathcal{C}} \subset \mathbb{R}^2\).
 
@@ -172,18 +173,18 @@ prescribed edges will suffice.
 \label{fig:cdt}
 \end{figure}
 
-\subsection{Solving the Laplace equation}
+\subsection{Solving the Poisson equation}
 \label{sec:poisson}
 
 In order to decide on the placement of the new vertices and triangles, we solve
-the Laplace equation\footnote{The choice of the Laplace equation is motivated by
+the Poisson equation\footnote{The choice of the Poisson equation is motivated by
 the following heuristic observation: a \emph{quality mesh} is often synonymous
-with a \emph{good mesh for the finite element solution of the Laplace
-equation}.} using the FEM and evalute the corresponding a~posteriori error
+with a \emph{good mesh for the finite element solution of the Poisson
+equation}.} using the FEM and evaluate the corresponding a~posteriori error
 estimator.  The triangles that have the highest values of the error estimator
 are refined, i.e.~split into smaller triangles.
 
-The Laplace equation reads: find $u : \Omega_{\mathcal{C}} \rightarrow \mathbb{R}$ satisfying
+The problem reads: find $u : \Omega_{\mathcal{C}} \rightarrow \mathbb{R}$ satisfying
 \begin{alignat}{2}
 -\Delta u &= 1 \quad && \text{in $\Omega_{\mathcal{C}}$,} \\
 u &= 0 \quad && \text{on $\partial \Omega_{\mathcal{C}}$.}
