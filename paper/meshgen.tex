@@ -65,7 +65,7 @@ splitting the domain of the solution into primitive shapes such as triangles or
 tetrahedra.  The collection of the primitive shapes, i.e.~the computational
 mesh, is used to define the discretisation, e.g., in the FEM, the shape
 functions are polynomial in each mesh element, and in the FVM, the discrete
-fluxes are defined over the edges of the cells.
+fluxes are defined over the cell edges or faces.
 
 This article describes a simple approach for the triangulation of
 two-dimensional polygonal domains.  The process can be summarised as follows:
@@ -98,7 +98,7 @@ mesh smoothing algorithm---can act as a simple triangular mesh generator.
 Two popular techniques for generating unstructured meshes are those based on the
 \emph{advancing front technique}~\cite{L_hner_1988} or the \emph{Delaunay mesh
 refinement}~\cite{Chew_1989, Ruppert_1995, Shewchuk_2002}.  In addition, there
-exists several less known techniques such as \emph{quadtree
+exist several less known techniques such as \emph{quadtree
 meshing}~\cite{Yerry_1983}, \emph{bubble packing}~\cite{Shimada_1995}, and
 hybrid techniques combining some of the above~\cite{mavriplis1995advancing}.
 
@@ -111,7 +111,7 @@ indicators above a predefined threshold.
 
 Persson--Strang~\cite{persson2004simple} describe another technique based on
 iterative relocation of the nodes.  An initial mesh is given by a structured
-background mesh which is then relaxed by intepreting the edges as a
+background mesh which is then relaxed by interpreting the edges as a
 precompressed truss structure.  The structure is forced inside a given domain by
 expressing the boundary using signed distance functions and interpreting the
 signed distance as an external load acting on the truss.  In contrast to the
