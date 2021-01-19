@@ -18,7 +18,7 @@
 \usepackage{algorithm}
 \usepackage{xcolor}
 \usepackage{algorithmicx}
-\usepackage[noend]{algpseudocode}
+\usepackage{algpseudocode}
 \author{Tom Gustafsson\footnote{Corresponding author. \texttt{firstname.lastname@aalto.fi}}}
 \date{\today}
 \hypersetup{
@@ -134,10 +134,9 @@ that form a polygon when connected by the edges
 $$(\mathcal{C}_1, \mathcal{C}_2), (\mathcal{C}_2,\mathcal{C}_3),
 \dots, (\mathcal{C}_{N-1}, \mathcal{C}_N), (\mathcal{C}_N,\mathcal{C}_1).$$
 We do not allow self-intersecting polygons although
-the algorithm can be generalised to polygons
-with holes which we have done in our implementation
-of the algorithm~\cite{adaptmesh2020}.
-The corresponding polygonal domain is denoted
+the algorithm generalises to polygons
+with polygonal holes.
+The corresponding domain is denoted
 by \(\Omega_{\mathcal{C}} \subset \mathbb{R}^2\).
 
 \subsection{Constrained Delaunay triangulation}
@@ -308,12 +307,12 @@ for the spiral-shaped domain example is given in Figure~\ref{fig:spiralexample}.
   \caption{Pseudocode for the triangular mesh generator}
   \label{alg:meshgen}
   \begin{algorithmic}[1]
-    \Require{$\mathcal{C}$ is a sequence of polygonal domain corner points}
+    \Require{$\mathcal{C}$ is a sequence of corner points for a polygonal domain}
     \Require{$M$ is the total number of refinements}
     \Statex
     \Function{Adaptmesh}{$\mathcal{C}$}
     \Let{$\mathcal{T}_0^\prime$}{$\textsc{CDT}(\mathcal{C}$)}
-    \Let{$\mathcal{T}_0$}{$\mathcal{T}_0^\prime$ with triangles outside of the boundary removed}
+    \Let{$\mathcal{T}_0$}{$\mathcal{T}_0^\prime$ with triangles outside of $\mathcal{C}$ removed}
     \For{$k \gets 1 \textrm{ to } M$}
     \Let{$\mathcal{T}_k^\prime$}{$\textsc{RGB}(\mathcal{T}_{k-1},\{\eta_T : T \in \mathcal{T}_{k-1}\})$}
     \Let{$\mathcal{T}_k$}{$\textsc{CPT}(\mathcal{T}_k^\prime)$}
@@ -332,12 +331,12 @@ scientific Python ecosystem~\cite{virtanen2020scipy}.  It includes source code
 from pre-existing Python packages \verb|tri| \cite{tri} (CDT implementation,
 ported from Python 2) and the older MIT-licensed versions of \verb|optimesh|
 \cite{optimesh} (CPT smoothing) and \verb|meshplex| \cite{meshplex} (edge
-flipping).  Moreover, it dynamically imports modules from \verb|scikit-fem|
-\cite{gustafsson2020scikit} (RGB refinement) and \verb|matplotlib|
-\cite{hunter2007matplotlib} (visualization).
+flipping).  Moreover, it performs adaptive mesh refinement using
+\verb|scikit-fem| \cite{gustafsson2020scikit} and visualisation using
+\verb|matplotlib| \cite{hunter2007matplotlib}.
 
 Some example meshes are given in Figure~\ref{fig:moreexamples}.  By
-default our implementation uses the average triangle quality\footnote{Triangle
+default, our implementation uses the \emph{average} triangle quality\footnote{Triangle
 quality is defined as two times the ratio of the incircle and circumcircle
 radii.} above 0.9 as a stopping criterion which can lead to individual slit triangles.
 This is visible especially in the last two examples that have small
@@ -352,86 +351,16 @@ interior angles on the boundary.
   \includegraphics[width=0.32\textwidth]{./image_23.png}
   \caption{Some example meshes generated using our
     implementation of the proposed algorithm.
-  The source code is available in \cite{tomgustafsson_2020}.}
+  The source code for the examples is available in \cite{tomgustafsson_2020}.}
 \label{fig:moreexamples}
 \end{figure}
 
 \section{An example application}
 
-Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes} report on measurements using a
-microfluidic device which is analogous to electron transport in two-dimensional
-conductive materials such as graphene. The governing equation is the Stokes
-system
-\begin{equation}
-  \left\{
-  \begin{aligned}
-    -\nabla \cdot (2\mu\,\varepsilon(\nabla u)) + \nabla p &= 0, \\
-    \nabla \cdot u &= 0,
-  \end{aligned}
-  \right.
-\end{equation}
-where the unknowns are the velocity $u : \Omega \rightarrow \mathbb{R}^2$ and
-the pressure $p : \Omega \rightarrow \mathbb{R}$, the parameter $\mu > 0$ is
-given, and $\varepsilon(\nabla u) = \tfrac12(\nabla u + \nabla u^T)$ is the
-rate-of-strain tensor.
-
-We extract the boundary $\partial \Omega$ of the computational domain $\Omega
-\subset \mathbb{R}^2$ from a photograph of the experiment and input it to the
-mesh generator; the photograph of the experiment is given in
-Figure~\ref{fig:photo} and the resulting computational mesh in
-Figure~\ref{fig:photomesh}.  In order to simplify the problem setup we choose
-the computational domain so that the left boundary corresponds to the vertical
-streamlines in the micro-particle image velocimetry; see
-Figure~\ref{fig:velocimetry}.  This allows using the Dirichlet boundary
-condition $u_x = 0$, $u_y = -U$, $U > 0$, on the left boundary.
-
-We aim to reproduce the location of the swirl and, therefore, the exact
-parameter values $U=\mu=1$ are irrelevant as they scale only the maximum values
-of the velocity and the pressure fields, i.e.~the shape of the solution will not
-change.  The numerical result, calculated and visualised with the help of the
-finite volume package \verb|FiPy|~\cite{FiPy2009} and the plotting library
-\verb|matplotlib|~\cite{hunter2007matplotlib}, is given in
-Figure~\ref{fig:result}.
-
-\begin{figure}[htbp]
-  \centering
-  \begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./esimerkki_1.png}
-    \caption{A photograph of the experiment. \cite{mayzel2019stokes}}
-    \label{fig:photo}
-  \end{subfigure}
-  \hspace{2cm}
-  \begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \includegraphics[width=0.9\textwidth]{./esimerkki_2.png}
-    \caption{The corresponding mesh from \texttt{adaptmesh}.}
-    \label{fig:photomesh}
-  \end{subfigure}
-  \\
-  \begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./esimerkki_3.png}
-    \caption{Experimental streamlines from micro-particle image velocimetry. \cite{mayzel2019stokes}}
-    \label{fig:velocimetry}
-  \end{subfigure}
-  \hspace{2cm}
-  \begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{./esimerkki_4.png}
-    \caption{Computational streamlines from \texttt{FiPy}~\cite{FiPy2009} and \texttt{matplotlib}~\cite{hunter2007matplotlib}.}
-    \label{fig:result}
-  \end{subfigure}
-  \hfill
-\caption{
-  The experimental images on
-  the left panel are cropped from the figures in
-  Mayzel--Steinberg--Varshney~\cite{mayzel2019stokes}. The original images are
-  licensed under Creative Commons Attribution 4.0 International License
-  (see~\url{https://web.archive.org/web/20201113111448/https://creativecommons.org/licenses/by/4.0/}).
-}
-\label{fig:esimerkki}
-\end{figure}
+This example utilises a variant of Algorithm~\ref{alg:meshgen} with step 2
+modified to include an additional polygon in the CDT and step 3 modified to
+remove any triangles inside the additional polygon.  This minor variation
+allows the prescription of holes in the final triangulation.
 
 \section{Conclusions}
 \label{sec:org615e973}
@@ -442,8 +371,9 @@ centroidal patch triangulation smoothing.  We presented a prototype
 implementation which demonstrates that many of the resulting
 meshes are reasonable and have an average triangle quality equal to or above
 0.9.
-The majority of the required components are likely to exist in an
-implementation of the adaptive finite element method.  Therefore, the algorithm
+
+The majority of the required components are likely to be present in an
+existing implementation of the adaptive finite element method.  Therefore, the algorithm
 can be a compelling candidate when an existing adaptive finite element solver is
 supplemented with basic mesh generation capabilities.
 Technically the approach extends to three dimensions although in practice the
