@@ -1,5 +1,7 @@
 * Manuscript sources
 
+[[https://zenodo.org/badge/DOI/10.5281/zenodo.4486550.svg]]
+
 This repository contains the LaTeX source for the manuscript "A simple technique
 for unstructured mesh generation via adaptive finite elements" by T. Gustafsson,
 and the Python source code for the computational examples included in the
