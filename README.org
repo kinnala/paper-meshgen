@@ -1,4 +1,4 @@
-* A simple technique for unstructured mesh generation via adaptive finite elements
+* Manuscript sources
 
 This repository contains the LaTeX source for the manuscript "A simple technique
 for unstructured mesh generation via adaptive finite elements" by T. Gustafsson,
@@ -7,3 +7,9 @@ manuscript.
 
 The source code of the mesh generator is available at
 https://github.com/kinnala/adaptmesh.
+
+* Instructions
+
+- The examples are run by Github Actions, see `.github/workflows`.
+- Github Actions collects the figures as an artifact: download this artifact to `paper/`.
+- Run `make` in `paper/`.

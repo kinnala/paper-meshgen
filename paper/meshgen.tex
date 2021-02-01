@@ -323,7 +323,7 @@ for the spiral-shaped domain example is given in Figure~\ref{fig:spiralexample}.
 \end{algorithm}
 
 
-\section{Implementation and examples}
+\section{Implementation and example meshes}
 
 We created a prototype of the mesh generator in Python for computational
 experiments~\cite{adaptmesh2020}.  The implementation relies heavily on the
@@ -357,10 +357,61 @@ interior angles on the boundary.
 
 \section{An example application}
 
-This example utilises a variant of Algorithm~\ref{alg:meshgen} with step 2
-modified to include an additional polygon in the CDT and step 3 modified to
-remove any triangles inside the additional polygon.  This minor variation
-allows the prescription of holes in the final triangulation.
+This example utilises a variant of Algorithm~\ref{alg:meshgen} with steps 2 and 3
+modified to allow for the inclusion of polygonal holes~\cite{adaptmesh2020}.
+The holes are treated similarly as the sequence of corner points $\mathcal{C}$ in step 2
+and the triangles inside the holes are removed in step 3.
+We consider the domain
+\[
+\Omega = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 \geq 1, -4 \leq x \leq 4,-2 \leq y \leq 2\}
+\]
+which is approximated by the triangular mesh given in Figure~\ref{fig:kirsch}.
+We split the boundary of the domain into two as $\partial \Omega = \Gamma \cup (\partial \Omega \setminus \Gamma)$
+where $\Gamma = \{ (x, y) \in \mathbb{R}^2 : |x|=4 \}$, and
+consider the following linear elastic boundary value problem: find $\boldsymbol{u} : \Omega \rightarrow \mathbb{R}^2$ satisfying
+\begin{alignat}{2}
+  -\mathrm{div}\,\boldsymbol{\sigma}(\boldsymbol{u}) + \varepsilon \boldsymbol{u} &= \boldsymbol{0} \qquad &&\text{in $\Omega$},\\
+  \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} \cdot \boldsymbol{n} &= g \qquad &&\text{on $\Gamma$},\\
+  \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} \cdot \boldsymbol{t} &= 0 \qquad &&\text{on $\Gamma$},\\
+  \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} &= \boldsymbol{0} \qquad &&\text{on $\partial \Omega \setminus \Gamma$},
+\end{alignat}
+where
+\[
+\boldsymbol{\sigma}(\boldsymbol{u}) = 2 \mu \boldsymbol{\epsilon}(\boldsymbol{u}) + \lambda \,\mathrm{tr}\,\boldsymbol{\epsilon}(\boldsymbol{u}) \boldsymbol{I} \in \mathbb{R}^{2 \times 2}, \quad \boldsymbol{\epsilon}(\boldsymbol{u}) = \frac12\left(\nabla \boldsymbol{u} + \nabla \boldsymbol{u}^T\right) \in \mathbb{R}^{2 \times 2},
+\]
+and
+$\boldsymbol{n} \in \mathbb{R}^2$ denotes the outward unit normal, $\boldsymbol{t} = [n_2, -n_1]^T$,
+$\boldsymbol{I} \in \mathbb{R}^{2 \times 2}$ is the identity matrix,
+and the remaining parameters are $\varepsilon = 10^{-6}$, $g = 10^{-1}$, $\mu = \lambda = 1$.
+
+We solve the above problem using the finite element method and quadratic
+Lagrange elements.  The resulting deformed mesh, with the vertices of the original mesh displaced by $\boldsymbol{u}$,
+is given in Figure~\ref{fig:kirsch}.
+A reference value of the stress $(\boldsymbol{\sigma}(\boldsymbol{u}(x, y))_{11} = \sigma_{11}(x, y)$
+at the internal and the external boundary
+is given by \mbox{Howland~\cite{howland1930stresses}}
+via successive approximation as $\sigma_{11}(0, 2) = \sigma_{11}(0, -2) \approx 0.75 g$ and
+$\sigma_{11}(0, 1) = \sigma_{11}(0, -1) \approx 4.3 g$.
+A comparison of the finite element approximation to the reference values
+is given in Figure~\ref{fig:kirsch2}.
+
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth]{image_24.png}\\
+  \includegraphics[width=0.5\textwidth]{image_25.png}
+  \caption{The original and the deformed meshes: the vertices of the original mesh are deformed using the
+  finite element approximation of $\boldsymbol{u}$.}
+  \label{fig:kirsch}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{image_27.png}
+  \caption{A comparison of the finite element approximation of the stress $\sigma_{11}(0, y)$ for $y \in [-2, 2] \setminus (-1, 1)$
+  and the pointwise reference values from Howland~\cite{howland1930stresses}.}
+  \label{fig:kirsch2}
+\end{figure}
 
 \section{Conclusions}
 \label{sec:org615e973}
