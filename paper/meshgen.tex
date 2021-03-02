@@ -1,5 +1,5 @@
-%\documentclass[12pt]{rmstyle}
-\documentclass[11pt]{article}
+\documentclass[12pt]{rmstyle}
+%\documentclass[11pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{grffile}
@@ -30,12 +30,12 @@
 }
 \title{A simple technique for unstructured mesh generation via adaptive finite elements}
 
-%% \makeatletter
-%%  \volume{XX}
-%%  \issue{Y}
-%%  \year{20ZZ}
-%%  \doilabel{12345}
-%% \makeatother
+\makeatletter
+ \volume{XX}
+ \issue{Y}
+ \year{20ZZ}
+ \doilabel{12345}
+\makeatother
  
 \begin{document}
 
@@ -363,36 +363,42 @@ The holes are treated similarly as the sequence of corner points $\mathcal{C}$ i
 and the triangles inside the holes are removed in step 3.
 We consider the domain
 \[
-\Omega = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 \geq 1, -4 \leq x \leq 4,-2 \leq y \leq 2\}
+\Omega = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 \geq a^2, -4a \leq x \leq 4a,-2a \leq y \leq 2a\}
 \]
 which is approximated by the triangular mesh given in Figure~\ref{fig:kirsch}.
 We split the boundary of the domain into two as $\partial \Omega = \Gamma \cup (\partial \Omega \setminus \Gamma)$
-where $\Gamma = \{ (x, y) \in \mathbb{R}^2 : |x|=4 \}$, and
+where $\Gamma = \{ (x, y) \in \mathbb{R}^2 : |x|=4a \}$, and
 consider the following linear elastic boundary value problem: find $\boldsymbol{u} : \Omega \rightarrow \mathbb{R}^2$ satisfying
 \begin{alignat}{2}
-  -\mathrm{div}\,\boldsymbol{\sigma}(\boldsymbol{u}) + \varepsilon \boldsymbol{u} &= \boldsymbol{0} \qquad &&\text{in $\Omega$},\\
+  \mathrm{div}\,\boldsymbol{\sigma}(\boldsymbol{u}) &= \boldsymbol{0} \qquad &&\text{in $\Omega$},\\
   \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} \cdot \boldsymbol{n} &= g \qquad &&\text{on $\Gamma$},\\
     \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} \cdot \boldsymbol{t} &= 0 \qquad &&\text{on $\Gamma$},\\
   \boldsymbol{\sigma}(\boldsymbol{u})\boldsymbol{n} &= \boldsymbol{0} \qquad &&\text{on $\partial \Omega \setminus \Gamma$},
 \end{alignat}
 where
 \[
-\boldsymbol{\sigma}(\boldsymbol{u}) = 2 \mu \boldsymbol{\epsilon}(\boldsymbol{u}) + \lambda \,\mathrm{tr}\,\boldsymbol{\epsilon}(\boldsymbol{u}) \boldsymbol{I} \in \mathbb{R}^{2 \times 2}, \quad \boldsymbol{\epsilon}(\boldsymbol{u}) = \frac12\left(\nabla \boldsymbol{u} + \nabla \boldsymbol{u}^T\right) \in \mathbb{R}^{2 \times 2},
+\boldsymbol{\sigma}(\boldsymbol{u}) = 2 \mu\, \boldsymbol{\epsilon}(\boldsymbol{u}) + \lambda \,\mathrm{tr}\,\boldsymbol{\epsilon}(\boldsymbol{u}) \boldsymbol{I} \in \mathbb{R}^{2 \times 2}, \quad \boldsymbol{\epsilon}(\boldsymbol{u}) = \frac12\left(\nabla \boldsymbol{u} + \nabla \boldsymbol{u}^T\right) \in \mathbb{R}^{2 \times 2},
 \]
 and
 $\boldsymbol{n} \in \mathbb{R}^2$ denotes the outward unit normal,
 $\boldsymbol{t} \in \mathbb{R}^2$ is the corresponding unit tangent,
-$\boldsymbol{I} \in \mathbb{R}^{2 \times 2}$ is the identity matrix,
-and the remaining parameters are $\varepsilon = 10^{-6}$, $g = 10^{-1}$, $\mu = \lambda = 1$.
+$\boldsymbol{I} \in \mathbb{R}^{2 \times 2}$ is the identity matrix.
+Additional parameters describing the problem are the Lam\'{e} parameters
+which are chosen to be equal
+$\mu = \lambda$, the radius of the hole $a$, and a uniform tensile force
+$g$.
 
-We solve the above problem using the finite element method and quadratic
-Lagrange elements~\cite{Verf_rth_2013}.  The resulting deformed mesh, with the vertices of the original mesh displaced by the finite element approximation of $\boldsymbol{u}$,
+We solve the above problem using the finite element method and piecewise-quadratic
+elements~\cite{Verf_rth_2013}.
+The rigid body motion is eliminated by constraining the bottommost node on $x=0$
+to zero.
+The resulting deformed mesh, with the vertices of the original mesh displaced by the finite element approximation of $\boldsymbol{u}$,
 is given in Figure~\ref{fig:kirsch}.
 A reference value of the stress $(\boldsymbol{\sigma}(\boldsymbol{u}(x, y))_{11} = \sigma_{11}(x, y)$
 at internal and external boundaries along $x=0$
 is given by \mbox{Howland~\cite{howland1930stresses}}
-via successive approximation. The reference values are $\sigma_{11}(0, 2) = \sigma_{11}(0, -2) \approx 0.75 g$ and
-$\sigma_{11}(0, 1) = \sigma_{11}(0, -1) \approx 4.3 g$.
+via successive approximation. The reference values are $\sigma_{11}(0, 2a) = \sigma_{11}(0, -2a) \approx 0.75 g$ and
+$\sigma_{11}(0, a) = \sigma_{11}(0, -a) \approx 4.3 g$.
 A comparison of the finite element approximation and the reference values
 is given in Figure~\ref{fig:kirsch2}.
 
@@ -409,7 +415,7 @@ is given in Figure~\ref{fig:kirsch2}.
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{image_27.png}
-  \caption{A comparison of the finite element approximation of the stress $\sigma_{11}(0, y)$ for $y \in [-2, 2] \setminus (-1, 1)$
+  \caption{A comparison of the finite element approximation of the stress $\sigma_{11}(0, y)$ for $y \in [-2a, 2a] \setminus (-a, a)$
   and the pointwise reference values from Howland~\cite{howland1930stresses}.}
   \label{fig:kirsch2}
 \end{figure}
