@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install adaptmesh==0.2.0 jupyter
+        pip install matplotlib==3.2.2 numpy==1.20.0 scipy==1.4.1 scikit-fem==2.5.0 adaptmesh==0.2.0 jupyter
     - name: Run example_meshes.ipynb
       run: |
         sh run_extract.sh examples/example_meshes
