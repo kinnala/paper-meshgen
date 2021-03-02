@@ -1,6 +1,6 @@
 * Manuscript sources
 
-<a href="https://doi.org/10.5281/zenodo.4574540"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4574540.svg" alt="DOI"></a>
+https://doi.org/10.5281/zenodo.4574540
 
 This repository contains the LaTeX source for the manuscript "A simple technique
 for unstructured mesh generation via adaptive finite elements" by T. Gustafsson,
